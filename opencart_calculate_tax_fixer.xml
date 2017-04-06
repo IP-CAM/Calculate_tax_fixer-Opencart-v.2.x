@@ -1,0 +1,69 @@
+<modification>
+  <id>OC Calculate Tax Fixer</id>
+  <version>1.0.0</version>
+  <vqmver>2.1.5</vqmver>
+  <author>Michal Kortas webroad.pl</author>
+
+  <file name="system/library/tax.php">
+    <operation error="skip">
+      <search position="replace"><![CDATA[public function calculate($value, $tax_class_id, $calculate = true) {]]></search>
+      <add><![CDATA[public function calculate($value, $tax_class_id, $calculate = true, $quantity = 1) {]]></add>
+    </operation>
+	<operation error="skip">
+      <search position="replace"><![CDATA[return $value + $amount;]]></search>
+      <add><![CDATA[return (round($value+$amount, 2)) * $quantity;]]></add>
+    </operation>
+	<operation error="skip">
+      <search position="replace"><![CDATA[return $value;]]></search>
+      <add><![CDATA[return (round($value, 2)) * $quantity;]]></add>
+    </operation>
+  </file>
+  
+  <file name="system/library/cart.php">
+    <operation error="skip">
+      <search position="replace"><![CDATA[$total += $this->tax->calculate($product['total'], $product['tax_class_id'], $this->config->get('config_tax'));]]></search>
+      <add><![CDATA[$total += $this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax'),$product['quantity']);]]></add>
+    </operation>	
+	<operation error="skip">
+      <search position="replace"><![CDATA[$tax_data[$tax_rate['tax_rate_id']] = ($tax_rate['amount'] * $product['quantity']);]]></search>
+      <add><![CDATA[$tax_data[$tax_rate['tax_rate_id']] = (round($tax_rate['amount'], 2) * $product['quantity']);]]></add>
+    </operation>
+	<operation error="skip">
+      <search position="replace"><![CDATA[$tax_data[$tax_rate['tax_rate_id']] += ($tax_rate['amount'] * $product['quantity']);]]></search>
+      <add><![CDATA[$tax_data[$tax_rate['tax_rate_id']] += (round($tax_rate['amount'], 2) * $product['quantity']);]]></add>
+    </operation>
+  </file>
+  
+  <file name="admin/controller/sale/order.php">
+    <operation error="skip">
+      <search position="replace"><![CDATA['price'               => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value']),]]></search>
+      <add><![CDATA['price'               => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? round($product['tax'],2) : 0), $order_info['currency_code'], $order_info['currency_value']),]]></add>
+    </operation>
+	<operation error="skip">
+      <search position="replace"><![CDATA['total'               => $this->currency->format($product['total'] + ($this->config->get('config_tax') ? ($product['tax'] * $product['quantity']) : 0), $order_info['currency_code'], $order_info['currency_value']),]]></search>
+      <add><![CDATA['total'               => $this->currency->format($product['total'] + ($this->config->get('config_tax') ? (round($product['tax'],2) * $product['quantity']) : 0), $order_info['currency_code'], $order_info['currency_value']),]]></add>
+    </operation>
+	<operation error="skip">
+      <search position="replace"><![CDATA['price'    => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? $product['tax'] : 0), $order_info['currency_code'], $order_info['currency_value']),]]></search>
+      <add><![CDATA['price'    => $this->currency->format($product['price'] + ($this->config->get('config_tax') ? round($product['tax'],2) : 0), $order_info['currency_code'], $order_info['currency_value']),]]></add>
+    </operation>
+	<operation error="skip">
+      <search position="replace"><![CDATA['total'    => $this->currency->format($product['total'] + ($this->config->get('config_tax') ? ($product['tax'] * $product['quantity']) : 0), $order_info['currency_code'], $order_info['currency_value'])]]></search>
+      <add><![CDATA['total'    => $this->currency->format($product['total'] + ($this->config->get('config_tax') ? (round($product['tax'],2) * $product['quantity']) : 0), $order_info['currency_code'], $order_info['currency_value'])]]></add>
+    </operation>
+  </file>
+  
+  <file name="catalog/controller/checkout/confirm.php">
+    <operation error="skip">
+      <search position="replace"><![CDATA['tax'        => $this->tax->getTax($product['price'], $product['tax_class_id']),]]></search>
+      <add><![CDATA['tax'        => round($this->tax->getTax($product['price'], $product['tax_class_id']),2),]]></add>
+    </operation>
+  </file>
+  
+  <file name="catalog/controller/checkout/cart.php">
+    <operation error="skip">
+      <search position="replace"><![CDATA[$total = $this->currency->format($this->tax->calculate($product['total'], $product['tax_class_id'], $this->config->get('config_tax')));]]></search>
+      <add><![CDATA[$total = $this->currency->format($this->tax->calculate($product['price'], $product['tax_class_id'], $this->config->get('config_tax'),$product['quantity']));]]></add>
+    </operation>	
+  </file>  
+</modification>
